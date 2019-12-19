@@ -1,1 +1,2 @@
 mikeLog=com.mike.spi.log.impl.MikeLog
+jsonLog=com.mike.spi.log.impl.JsonLog

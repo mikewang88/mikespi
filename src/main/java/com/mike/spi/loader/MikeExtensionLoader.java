@@ -106,6 +106,8 @@ public class MikeExtensionLoader<T> {
                     holder.set(instance);
                 }
             }
+        }else {
+            System.out.println(name+"已经实例化");
         }
         return (T) instance;
     }
@@ -167,69 +169,12 @@ public class MikeExtensionLoader<T> {
         //设置默认扩展名称
         cacheDefaultExtensionName();
         Map<String,Class<?>> extensionClasses = new HashMap<>();
-        //loadDirectory(extensionClasses, MIKE_SERVICES_DIRECTORY, type.getName());
-        loadFile(extensionClasses, MIKE_SERVICES_DIRECTORY);
+        loadDirectory(extensionClasses, MIKE_SERVICES_DIRECTORY, type.getName());
+        //loadFile(extensionClasses, MIKE_SERVICES_DIRECTORY);
         return extensionClasses;
     }
 
-    //加载解析spi配置文件,然后加入缓存
-    public void loadFile(Map<String, Class<?>> extensionClasses, String dir) {
-        String fileName = dir + type.getName();
-        try {
-            Enumeration<URL> urls;
-            ClassLoader classLoader = findClassLoader();
-            if (classLoader != null) {
-                urls = classLoader.getResources(fileName);
-            } else {
-                urls = ClassLoader.getSystemResources(fileName);
-            }
-            if (urls != null) {
-                    while (urls.hasMoreElements()) {
-                    java.net.URL url = urls.nextElement();
-                    try {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
-                        try {
-                            String line = null;
-                            while ((line = reader.readLine()) != null) {
-                                final int ci = line.indexOf('#');
-                                if (ci >= 0) line = line.substring(0, ci);
-                                line = line.trim();
-                                if (line.length() > 0) {
-                                    try {
-                                        String name = null;
-                                        int i = line.indexOf('=');
-                                        if (i > 0) {
-                                            name = line.substring(0, i).trim();
-                                            line = line.substring(i + 1).trim();
-                                        }
-                                        if (line.length() > 0) {
-                                            Class<?> clazz = Class.forName(line, true, classLoader);
-                                            if (!type.isAssignableFrom(clazz)) {
-                                                throw new IllegalStateException("Error when load extension class(interface: " +
-                                                        type + ", class line: " + clazz.getName() + "), class "
-                                                        + clazz.getName() + "is not subtype of interface.");
-                                            }
-                                            extensionClasses.put(name, clazz);//加入缓存
-                                        }//源码中还有其他的判断,这个版本暂不实现
-                                    } catch (Throwable t) {
-                                        IllegalStateException e = new IllegalStateException("Failed to load extension class(interface: " + type + ", class line: " + line + ") in " + url + ", cause: " + t.getMessage(), t);
-                                        exceptions.put(line, e);
-                                    }
-                                }
-                            } // end of while read lines
-                        } finally {
-                            reader.close();
-                        }
-                    } catch (Throwable t) {
-                        //logger.error("Exception when load extension class(interface: " +
-                        //        type + ", class file: " + url + ") in " + url, t);
-                    }
-                } // end of while urls
-            }
-        } catch (Throwable e) {
-            //logger.error("Exception when load extension class(interface: " + type + ", description file: " + fileName + ").", e);
-        }
-    }
+
 
     private void cacheDefaultExtensionName(){
         final MikeSPI defaultAnnotation = type.getAnnotation(MikeSPI.class);

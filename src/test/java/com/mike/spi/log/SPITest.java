@@ -14,6 +14,12 @@ public class SPITest {
     public void test() throws Exception{
         Log defaultExtension = MikeExtensionLoader.getExtensionLoader(Log.class).getDefaultExtension();
         defaultExtension.sayHello();
+
+        Log jsonlog = MikeExtensionLoader.getExtensionLoader(Log.class).getExtension("jsonLog");
+        jsonlog.sayHello();
+
+        Log mikeLog = MikeExtensionLoader.getExtensionLoader(Log.class).getExtension("mikeLog");
+        mikeLog.sayHello();
     }
 
 }
